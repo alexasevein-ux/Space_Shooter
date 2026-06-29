@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: ef070ed75de271b41aba41601dc90fbe
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - _laserPrefab: {instanceID: 0}
+  - _tripleShotPrefab: {instanceID: 0}
+  - _shieldVisualizer: {instanceID: 0}
+  - _rightEngine: {instanceID: 0}
+  - _leftEngine: {instanceID: 0}
+  - _explosionPrefab: {instanceID: 0}
+  - _shieldVisual: {instanceID: 0}
+  - _cameraShake: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
