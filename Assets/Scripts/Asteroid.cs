@@ -24,6 +24,7 @@ public class Asteroid : MonoBehaviour
     {
         if (other.CompareTag("Laser"))
         {
+            GetComponent <AudioSource>().Play();
             Instantiate(_explosionPrefab, transform.position, Quaternion.identity);
             Destroy(other.gameObject);
             _spawnManager.StartSpawning();

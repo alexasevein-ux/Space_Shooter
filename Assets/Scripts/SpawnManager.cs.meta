@@ -3,7 +3,19 @@ guid: c49e4ccac5b3bef4ab77e5d2146fc061
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - _enemyPrefab: {fileID: 5447236327452420122, guid: 5ac0921c611a39e48b8d5215582ef46d,
+      type: 3}
+  - _enemyContainer: {instanceID: 0}
+  - _uiManager: {instanceID: 0}
+  - _healthPickup: {fileID: 2570689703464226142, guid: 298aa60495ee6894bb498c399a40e60f,
+      type: 3}
+  - _ammoPickup: {fileID: 1616865533821856384, guid: 02c52730b44c3c84cb5b2d83afa6dc0f,
+      type: 3}
+  - _shieldPickup: {fileID: 1961640793416905568, guid: d67228c9519f7f4498871de0e3bc1edb,
+      type: 3}
+  - _homingPowerUpPrefab: {fileID: 5948364316050744651, guid: 36613e913a6cdfe4fa261c24a172b576,
+      type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

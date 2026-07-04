@@ -51,13 +51,13 @@ MonoBehaviour:
   _speed: 1.5
   _detectionRange: 6
   _ramSpeed: 8
-  _chargeDelay: 1
-  _laserPrefab: {fileID: 5789600455934218877, guid: bf5908c2b0493d94195532ebfcf3fb5f,
+  _laserPrefab: {fileID: 7470284999295346605, guid: 87e92c41155c72b428dfa4bb3baf4169,
     type: 3}
   _enemyLaserPrefab: {fileID: 5789600455934218877, guid: bf5908c2b0493d94195532ebfcf3fb5f,
     type: 3}
-  _fireRate: 1.5
-  _enemyType: 0
+  _explosionPrefab: {fileID: 9006698277982832251, guid: 045864f4b39a98843a8a6da0217f66e7,
+    type: 3}
+  _enemyType: 1
   _movementPattern: 0
   _hasShield: 0
   _shieldHits: 1

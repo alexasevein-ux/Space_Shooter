@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 
 public class Player : MonoBehaviour
 {
@@ -57,11 +59,8 @@ public class Player : MonoBehaviour
     private GameObject _leftEngine;
     [SerializeField] 
     private GameObject _rightEngine;
+    [SerializeField]
     private CameraShake _cameraShake;
-
-    [Header("Score")]
-    [SerializeField] 
-    private int _score;
 
     [Header("Systems")]
     private SpawnManager _spawnManager;
@@ -80,8 +79,6 @@ public class Player : MonoBehaviour
     public int CurrentLives => _lives;
     public int CurrentAmmo => _currentAmmo;
     public int MaxAmmo => _maxAmmo;
-
-    private PowerUpType _currentPowerUp = PowerUpType.None;
 
     public void TripleShotActive()
     {
@@ -186,8 +183,6 @@ public class Player : MonoBehaviour
 
     void Start()
     {
-        _score = 0;
-
         _currentThrusterCharge = _maxThrusterCharge;
         _currentAmmo = _maxAmmo;
         _currentShieldHits = _shieldHits;
@@ -197,11 +192,6 @@ public class Player : MonoBehaviour
         _spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();
         _uiManager = GameObject.Find("Canvas").GetComponent<UIManager>();
         _cameraShake = Camera.main.GetComponent<CameraShake>();
-
-        if (_uiManager != null)
-        {
-            _uiManager.UpdateScore(_score);
-        }
     }
 
     void Update()
@@ -264,18 +254,47 @@ public class Player : MonoBehaviour
 
     void FireLaser()
     {
-        GameObject prefabToSpawn = _laserPrefab;
-
-        if (_isTripleShotActive)
-            prefabToSpawn = _tripleShotPrefab;
-
         if (_isHomingActive)
-            prefabToSpawn = _homingProjectilePrefab;
-
-        Instantiate(prefabToSpawn, transform.position, Quaternion.identity);
+        {
+            SpawnLaser(Vector2.up, 0f);
+        }
+        else if (_isTripleShotActive)
+        {
+            FireTripleShot();
+        }
+        else
+        {
+            SpawnLaser(Vector2.up, 0f);
+        }
 
         _currentAmmo--;
         _uiManager.UpdateAmmo(_currentAmmo, _maxAmmo);
+    }
+
+    void SpawnHomingMissile()
+    {
+        GameObject missile = Instantiate(_homingProjectilePrefab, transform.position, Quaternion.identity);
+    }
+
+    void FireTripleShot()
+    {
+        SpawnLaser(Vector2.up, -0.5f);
+        SpawnLaser(Vector2.up, 0f);
+        SpawnLaser(Vector2.up, 0.5f);
+    }
+
+    void SpawnLaser(Vector2 direction, float xOffset)
+    {
+        Vector3 spawnPos = transform.position + new Vector3(xOffset, 0f, 0f);
+
+        GameObject laserObject = Instantiate(_laserPrefab, spawnPos, Quaternion.identity);
+
+        Laser laser = laserObject.GetComponent<Laser>();
+
+        if (laser != null)
+        {
+            laser.Initialize(direction, Laser.LaserOwner.Player);
+        }
     }
 
     void HandleShooting()
@@ -283,6 +302,18 @@ public class Player : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space) && Time.time > _canFire && _currentAmmo > 0)
         {
             FireLaser();
+            _canFire = Time.time + _fireRate;
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        Laser laser = other.GetComponent<Laser>();
+
+        if (laser != null && laser.Owner == Laser.LaserOwner.Enemy)
+        {
+            Damage();
+            Destroy(other.gameObject);
         }
     }
 
@@ -307,9 +338,15 @@ public class Player : MonoBehaviour
         }
     }
 
-    public bool IsMagnetActive() => _isMagnetActive;
+    public bool IsMagnetActive()
+    {
+        return _isMagnetActive;
+    }
 
-    public float GetMagnetSpeed() => 10f;
+    public float GetMagnetSpeed()
+    {
+        return 10f;
+    }
 
     #endregion
 
@@ -447,16 +484,6 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(duration);
 
         _isHomingActive = false;
-    }
-
-    #endregion
-
-    #region SCORE
-
-    public void AddScore(int points)
-    {
-        _score += points;
-        _uiManager.UpdateScore(_score);
     }
 
     #endregion

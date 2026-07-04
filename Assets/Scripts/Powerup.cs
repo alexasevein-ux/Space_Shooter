@@ -11,9 +11,26 @@ public class Powerup : MonoBehaviour
     [SerializeField] 
     private int _value = 1;
 
+    private Player _player;
+
+    void Start()
+    {
+        _player = GameObject.Find("Player")?.GetComponent<Player>();
+    }
+
     void Update()
     {
-        transform.Translate(Vector3.down * _speed * Time.deltaTime);
+        if (_player != null && _player.IsMagnetActive())
+        {
+            transform.position = Vector3.MoveTowards(
+                transform.position,
+                _player.transform.position,
+                _player.GetMagnetSpeed() * Time.deltaTime);
+        }
+        else
+        {
+            transform.Translate(Vector3.down * _speed * Time.deltaTime);
+        }
 
         if (transform.position.y < -6f)
         {

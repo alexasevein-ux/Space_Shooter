@@ -26,7 +26,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] 
     private Image _shieldImage;
     [SerializeField] 
-    private Sprite[] _shieldSprites; // size = 4
+    private Sprite[] _shieldSprites;
     [SerializeField]
     private TMP_Text _ammoText;
     [SerializeField]
@@ -43,8 +43,6 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
-        UpdateScore(0);
-
         _gameManager = GameObject.Find("Game_Manager").GetComponent<GameManager>();
 
         _gameOverText.gameObject.SetActive(false);

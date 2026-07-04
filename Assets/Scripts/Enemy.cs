@@ -13,11 +13,8 @@ public class Enemy : MonoBehaviour
     [Header("Ramming")]
     [SerializeField]
     private float _ramSpeed = 8f;
-    [SerializeField]
-    private float _chargeDelay = 1f;
 
     private bool _isRamming;
-    private bool _isPreparingCharge;
 
     [Header("Prefabs")]
     [SerializeField]
@@ -25,9 +22,9 @@ public class Enemy : MonoBehaviour
     [SerializeField]
     private GameObject _enemyLaserPrefab;
 
-    [Header("Shooting")]
-    [SerializeField]
-    private float _fireRate = 1.5f;
+    [Header("Effects")]
+    [SerializeField] 
+    private GameObject _explosionPrefab;
 
     [Header("Enemy Type")]
     [SerializeField]
@@ -73,6 +70,8 @@ public class Enemy : MonoBehaviour
         _player = GameObject.Find("Player")?.GetComponent<Player>();
         _anim = GetComponent<Animator>();
         _audioSource = GetComponent<AudioSource>();
+
+        _canFire = Time.time + Random.Range(1f, 3f);
     }
 
     void Update()
@@ -87,6 +86,7 @@ public class Enemy : MonoBehaviour
             MoveEnemy();
 
         HandleShooting();
+        
         HandleAmbusherAttack();
 
         HandleBoundaryReset();
@@ -126,27 +126,22 @@ public class Enemy : MonoBehaviour
     private void FireBackward()
     {
         GameObject laser = Instantiate(_laserPrefab, transform.position, Quaternion.identity);
-
-        foreach (Laser l in laser.GetComponentsInChildren<Laser>())
-        {
-            l.AssignEnemyLaser();
-            l.SetDirection(Vector2.down); // or opposite of player direction
-        }
     }
 
     private void FireBackwardShot()
     {
         _canFire = Time.time + Random.Range(1f, 3f);
 
-        GameObject projectile = Instantiate(_enemyLaserPrefab, transform.position, Quaternion.identity);
+        Vector3 spawnPos = transform.position;
 
-        Vector2 direction = (_player.transform.position - transform.position).normalized;
+        GameObject laserObj = Instantiate(_laserPrefab, spawnPos, Quaternion.identity);
 
-        EnemyLaser laser = projectile.GetComponent<EnemyLaser>();
+        Laser laser = laserObj.GetComponent<Laser>();
 
         if (laser != null)
         {
-            laser.SetDirection(direction);
+            Vector2 direction = (_player.transform.position - transform.position).normalized;
+            laser.Initialize(direction, Laser.LaserOwner.Enemy);
         }
     }
 
@@ -178,20 +173,13 @@ public class Enemy : MonoBehaviour
 
     private void HandleShooting()
     {
-        if (_enemyType != EnemyType.Shooter) return;
+        if (_enemyType != EnemyType.Shooter)
+            return;
 
-        if (Time.time < _canFire) return;
+        if (Time.time < _canFire)
+            return;
 
-        Transform pickupTarget = FindNearestPickup();
-
-        if (pickupTarget != null)
-        {
-            ShootAtTarget(pickupTarget);
-        }
-        else
-        {
-            ShootPlayer();
-        }
+        ShootPlayer();
     }
 
     private void ShootAtTarget(Transform target)
@@ -202,29 +190,31 @@ public class Enemy : MonoBehaviour
 
         Vector2 direction = (target.position - transform.position).normalized;
 
-        EnemyLaser l = laser.GetComponent<EnemyLaser>();
+        Laser l = laser.GetComponent<Laser>();
 
         if (l != null)
         {
-            l.SetDirection(direction);
+            l.Initialize(direction, Laser.LaserOwner.Enemy);
         }
     }
 
     private void ShootPlayer()
     {
-        _canFire = Time.time + Random.Range(2f, 5f);
-
+        _canFire = Time.time + Random.Range(1f, 4f);
+        _canFire = Time.time + 1;
+        
         if (_player == null) return;
 
-        GameObject laser = Instantiate(_enemyLaserPrefab, transform.position, Quaternion.identity);
+        Vector3 spawnPos = transform.position;
 
-        Vector2 direction = (_player.transform.position - transform.position).normalized;
+        GameObject laserObj = Instantiate(_laserPrefab, spawnPos, Quaternion.identity);
 
-        EnemyLaser l = laser.GetComponent<EnemyLaser>();
+        Laser laser = laserObj.GetComponent<Laser>();
 
-        if (l != null)
+        if (laser != null)
         {
-            l.SetDirection(direction);
+            Vector2 direction = Vector2.down;
+            laser.Initialize(direction, Laser.LaserOwner.Enemy);
         }
     }
 
@@ -274,8 +264,13 @@ public class Enemy : MonoBehaviour
 
         GameObject laser = Instantiate(_laserPrefab, transform.position, Quaternion.identity);
 
-        foreach (Laser l in laser.GetComponentsInChildren<Laser>())
-            l.AssignEnemyLaser();
+        Laser l = laser.GetComponent<Laser>();
+
+        if (l != null)
+        {
+            Vector2 direction = Vector2.down;
+            l.Initialize(direction, Laser.LaserOwner.Enemy);
+        }
     }
 
     // ---------------- BOUNDARY ----------------
@@ -289,48 +284,65 @@ public class Enemy : MonoBehaviour
 
     // ---------------- COLLISION ----------------
     private void OnTriggerEnter2D(Collider2D other)
+{
+    if (_isDead)
+        return;
+
+    Laser laser = other.GetComponent<Laser>();
+
+    // Ignore enemy lasers completely
+    if (laser != null && laser.Owner == Laser.LaserOwner.Enemy)
     {
-        if (_isDead)
-            return;
+        return;
+    }
 
-        if (other.CompareTag("PowerUp"))
+    // Only player lasers can damage enemies
+    if (laser != null && laser.Owner == Laser.LaserOwner.Player)
+    {
+        if (_hasShield && _shieldHits > 0)
         {
-            Destroy(other.gameObject);
-            return;
+            _shieldHits--;
+
+            if (_shieldHits > 0)
+                return;
         }
 
-        if (other.CompareTag("Laser"))
-        {
-            Destroy(other.gameObject);
+        Death();
+        return;
+    }
 
-            if (_hasShield && _shieldHits > 0)
-            {
-                _shieldHits--;
+    if (other.CompareTag("Player"))
+    {
+        other.GetComponent<Player>()?.Damage();
+        Death();
+    }
+}
 
-                if (_shieldHits > 0)
-                    return;
-            }
-
-            Death();
-            return;
-        }
-
-        if (other.CompareTag("Player"))
-        {
-            other.GetComponent<Player>()?.Damage();
-            Death();
-        }
+    public void Damage()
+    {
+        Death();
     }
 
     private void Death()
     {
+        if (_isDead)
+            return;
+
         _isDead = true;
         _speed = 0;
 
-        _anim?.SetTrigger("OnEnemyDeath");
-        _audioSource?.Play();
-
         GetComponent<Collider2D>().enabled = false;
+
+        if (_anim != null)
+            _anim.SetTrigger("OnEnemyDeath");
+
+        if (_explosionPrefab != null)
+            Instantiate(_explosionPrefab, transform.position, Quaternion.identity);
+
+        if (_audioSource != null)
+            _audioSource.Play();
+
+        OnEnemyDestroyed?.Invoke(transform.position);
 
         Destroy(gameObject, 2.5f);
     }

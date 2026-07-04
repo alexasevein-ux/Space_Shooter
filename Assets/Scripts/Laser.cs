@@ -4,74 +4,65 @@ using UnityEngine;
 
 public class Laser : MonoBehaviour
 {
-    [SerializeField] private float _speed = 10f;
+    [SerializeField] 
+    private float _speed = 10f;
 
-    private Vector2 _direction = Vector2.up;
-    private bool _isEnemyLaser = false;
+    private Vector2 _direction;
 
-    public void SetDirection(Vector2 direction)
+    public enum LaserOwner
     {
-        _direction = direction.normalized;
+        Player,
+        Enemy
     }
 
-    public void AssignEnemyLaser()
+    public LaserOwner Owner { get; private set; }
+
+    public void Initialize(Vector2 direction, LaserOwner owner)
     {
-        _isEnemyLaser = true;
+        _direction = direction.normalized;
+        Owner = owner;
+    }
+
+    void Start()
+    {
+        Debug.Log(gameObject.name + " direction = " + _direction);
     }
 
     void Update()
     {
-        if (_isEnemyLaser == false)
-        {
-            MoveUp();
-        }
-        else
-        {
-            MoveDown();
-        }
-    }
-
-    void MoveUp()
-    {
-        transform.Translate(Vector3.up * _speed * Time.deltaTime);
-
-        if (transform.position.y > 8f)
-        {
-            if (transform.parent != null)
-            {
-                Destroy(transform.parent.gameObject);
-            }
-
-            Destroy(gameObject);
-        }
-    }
-
-    void MoveDown()
-    {
-        transform.Translate(Vector3.down * _speed * Time.deltaTime);
-
-        if (transform.position.y < -8f)
-        {
-            if (transform.parent != null)
-            {
-                Destroy(transform.parent.gameObject);
-            }
-
-            Destroy(gameObject);
-        }
+        transform.Translate(_direction * _speed * Time.deltaTime);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player") && _isEnemyLaser)
+        if (other.TryGetComponent<Laser>(out Laser otherLaser))
         {
-            Player player = other.GetComponent<Player>();
-
-            if (player != null)
+            if (otherLaser.Owner != Owner)
             {
-                player.Damage();
+                Destroy(otherLaser.gameObject);
                 Destroy(gameObject);
             }
+            return;
+        }
+
+        if (Owner == LaserOwner.Player && other.CompareTag("Enemy"))
+        {
+            other.GetComponent<Enemy>()?.Damage();
+            Destroy(gameObject);
+            return;
+        }
+
+        if (Owner == LaserOwner.Enemy && other.CompareTag("Player"))
+        {
+            other.GetComponent<Player>()?.Damage();
+            Destroy(gameObject);
+        }
+
+        if (Owner == LaserOwner.Enemy && other.CompareTag("PowerUp"))
+        {
+            Destroy(other.gameObject);
+            Destroy(gameObject);
+            return;
         }
     }
 }

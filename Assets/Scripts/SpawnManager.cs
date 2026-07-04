@@ -24,9 +24,9 @@ public class SpawnManager : MonoBehaviour
     private Player _player;
 
     private float _enemySpeed = 3f;
-    private float _spawnDelay = 0.5f;
+    private float _spawnDelay = 1.5f;
     private int _currentWave = 1;
-    private int _enemiesPerWave = 5;
+    private int _enemiesPerWave = 3;
     private bool _stopSpawning = false;
 
     void Start()
@@ -47,37 +47,13 @@ public class SpawnManager : MonoBehaviour
 
     public void StartSpawning()
     {
-        StartCoroutine(SpawnEnemyRoutine());
         StartCoroutine(SpawnPowerupRoutine());
         StartCoroutine(WaveRoutine());
-    }
-
-    IEnumerator SpawnRoutine()
-    {
-        while (_stopSpawning == false)
-        {
-            // Spawn enemies
-
-            yield return new WaitForSeconds(5f);
-        }
     }
 
     public void StopSpawning()
     {
         _stopSpawning = true;
-    }
-
-    IEnumerator SpawnEnemyRoutine()
-    {
-        yield return new WaitForSeconds(3.0f);
-
-        while (_stopSpawning == false)
-        {
-            Vector3 posToSpawn = new Vector3(Random.Range(-8f, 8f), 7, 0);
-            GameObject newEnemy = Instantiate(_enemyPrefab, posToSpawn, Quaternion.identity);
-            newEnemy.transform.parent = _enemyContainer.transform;
-            yield return new WaitForSeconds(5.0f);
-        }
     }
 
     IEnumerator SpawnPowerupRoutine()
@@ -115,7 +91,7 @@ public class SpawnManager : MonoBehaviour
             yield return new WaitForSeconds(_spawnDelay);
         }
 
-        yield return new WaitUntil(() =>
+            yield return new WaitUntil(() =>
             _enemyContainer.transform.childCount == 0);
     }
 
@@ -135,10 +111,10 @@ public class SpawnManager : MonoBehaviour
             Debug.Log("Wave " + _currentWave + " Complete!");
 
             _currentWave++;
-            _enemiesPerWave += 3;
+            _enemiesPerWave++;
 
             _enemySpeed += 0.25f;
-            _spawnDelay = Mathf.Max(0.1f, _spawnDelay - 0.05f);
+            _spawnDelay = Mathf.Max(0.75f, _spawnDelay - 0.05f);
 
             if (_currentWave % 2 == 0)
             {
@@ -147,13 +123,12 @@ public class SpawnManager : MonoBehaviour
 
             yield return new WaitForSeconds(3f);
 
-            _enemiesPerWave += 2;
             _enemySpeed += 0.25f;
 
             float pickupChance = Mathf.Clamp(40f - (_currentWave * 2), 10f, 40f);
         }
     }
-    
+
     private void SpawnFastEnemy()
     {
         Vector3 posToSpawn = new Vector3(Random.Range(-8f, 8f), 7f, 0);
@@ -191,8 +166,7 @@ public class SpawnManager : MonoBehaviour
         if (_player == null)
             return;
 
-        Vector3 spawnPos =
-            new Vector3(Random.Range(-8f, 8f), 7f, 0);
+        Vector3 spawnPos = new Vector3(Random.Range(-8f, 8f), 7f, 0);
 
         // Low health → higher chance for health
         if (_player.CurrentLives <= 1)

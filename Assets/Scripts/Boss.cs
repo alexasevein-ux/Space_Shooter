@@ -78,11 +78,7 @@ public class Boss : MonoBehaviour
     {
         if (!_inPosition)
         {
-            transform.position = Vector3.MoveTowards(
-                transform.position,
-                _targetPosition,
-                _moveSpeed * Time.deltaTime
-            );
+            transform.position = Vector3.MoveTowards(transform.position, _targetPosition, _moveSpeed * Time.deltaTime);
 
             if (Vector3.Distance(transform.position, _targetPosition) < 0.05f)
             {
