@@ -57,7 +57,7 @@ MonoBehaviour:
     type: 3}
   _explosionPrefab: {fileID: 9006698277982832251, guid: 045864f4b39a98843a8a6da0217f66e7,
     type: 3}
-  _enemyType: 1
+  _enemyType: 0
   _movementPattern: 0
   _hasShield: 0
   _shieldHits: 1

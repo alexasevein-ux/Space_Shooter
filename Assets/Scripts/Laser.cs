@@ -4,10 +4,14 @@ using UnityEngine;
 
 public class Laser : MonoBehaviour
 {
-    [SerializeField] 
+    [SerializeField]
     private float _speed = 10f;
-
+    [SerializeField]
     private Vector2 _direction;
+    [SerializeField]
+    private bool _isHoming;
+    [SerializeField]
+    private Transform _target;
 
     public enum LaserOwner
     {
@@ -25,12 +29,55 @@ public class Laser : MonoBehaviour
 
     void Start()
     {
-        Debug.Log(gameObject.name + " direction = " + _direction);
+        Debug.Log($"{gameObject.name} belongs to {Owner.ToString()} direction = {_direction} and IsHoming = {_isHoming}", this);
     }
 
     void Update()
     {
-        transform.Translate(_direction * _speed * Time.deltaTime);
+        if (_isHoming && _target != null)
+        {
+            Vector2 direction = (_target.position - transform.position).normalized;
+            transform.Translate(direction * _speed * Time.deltaTime, Space.World);
+        }
+        else
+        {
+            transform.Translate(_direction * _speed * Time.deltaTime, Space.World);
+        }
+
+        if (Mathf.Abs(transform.position.x) > 10f ||
+            Mathf.Abs(transform.position.y) > 8f)
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    public void SetHoming()
+    {
+        _isHoming = true;
+
+        Enemy[] enemies = FindObjectsOfType<Enemy>();
+
+        float closestDistance = Mathf.Infinity;
+
+        foreach (Enemy enemy in enemies)
+        {
+            float distance = Vector2.Distance(transform.position, enemy.transform.position);
+
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                _target = enemy.transform;
+            }
+        }
+
+        if (_target != null)
+        {
+            Debug.Log("Locked onto: " + _target.name);
+        }
+        else
+        {
+            Debug.Log("No enemies found for homing missile.");
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D other)

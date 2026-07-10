@@ -2,15 +2,16 @@
 
 public class Powerup : MonoBehaviour
 {
-    [SerializeField] 
+    [SerializeField]
     private float _speed = 3f;
-    [SerializeField] 
+    [SerializeField]
     private PowerUpType _powerUpType;
-    [SerializeField] 
+    [SerializeField]
     private float _duration = 6f;
-    [SerializeField] 
+    [SerializeField]
     private int _value = 1;
-
+    [SerializeField]
+    private int _powerupID;
     private Player _player;
 
     void Start()
@@ -22,10 +23,7 @@ public class Powerup : MonoBehaviour
     {
         if (_player != null && _player.IsMagnetActive())
         {
-            transform.position = Vector3.MoveTowards(
-                transform.position,
-                _player.transform.position,
-                _player.GetMagnetSpeed() * Time.deltaTime);
+            transform.position = Vector3.MoveTowards(transform.position, _player.transform.position, _player.GetMagnetSpeed() * Time.deltaTime);
         }
         else
         {
@@ -52,15 +50,12 @@ public class Powerup : MonoBehaviour
         switch (_powerUpType)
         {
             case PowerUpType.TripleShot:
+                player.RefillAmmo();
                 player.ApplyPowerUp(PowerUpType.TripleShot, _duration, _value);
                 break;
 
             case PowerUpType.SpeedBoost:
                 player.ApplyPowerUp(PowerUpType.SpeedBoost, _duration, _value);
-                break;
-
-            case PowerUpType.HomingShots:
-                player.ApplyPowerUp(PowerUpType.HomingShots, _duration, _value);
                 break;
 
             case PowerUpType.Shield:
@@ -74,6 +69,19 @@ public class Powerup : MonoBehaviour
             case PowerUpType.Ammo:
                 player.RefillAmmo();
                 break;
+
+            case PowerUpType.Bomb:
+                player.ActivateBomb();
+                break;
+
+            case PowerUpType.HomingShots:
+                player.ApplyPowerUp(PowerUpType.HomingShots, _duration, _value);
+                break;
+
+            case PowerUpType.Misfire:
+                player.ApplyPowerUp(PowerUpType.Misfire, _duration, _value);
+                break;
+
         }
     }
 }

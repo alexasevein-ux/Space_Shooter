@@ -4,13 +4,19 @@ MonoImporter:
   externalObjects: {}
   serializedVersion: 2
   defaultReferences:
-  - _laserPrefab: {instanceID: 0}
-  - _tripleShotPrefab: {instanceID: 0}
-  - _shieldVisualizer: {instanceID: 0}
-  - _rightEngine: {instanceID: 0}
-  - _leftEngine: {instanceID: 0}
-  - _explosionPrefab: {instanceID: 0}
+  - _laserPrefab: {fileID: 7470284999295346605, guid: 87e92c41155c72b428dfa4bb3baf4169,
+      type: 3}
+  - _tripleShotPrefab: {fileID: 6517407985168496466, guid: f48f84d19c2f96348a304bbfaf804c55,
+      type: 3}
+  - _homingProjectilePrefab: {fileID: 4754739659212547398, guid: 36613e913a6cdfe4fa261c24a172b576,
+      type: 3}
+  - _shieldVisualizer: {fileID: 1961640793416905568, guid: d67228c9519f7f4498871de0e3bc1edb,
+      type: 3}
   - _shieldVisual: {instanceID: 0}
+  - _explosionPrefab: {fileID: 9006698277982832251, guid: 045864f4b39a98843a8a6da0217f66e7,
+      type: 3}
+  - _leftEngine: {instanceID: 0}
+  - _rightEngine: {instanceID: 0}
   - _cameraShake: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}

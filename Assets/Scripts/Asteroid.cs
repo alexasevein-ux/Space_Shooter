@@ -4,11 +4,14 @@ using UnityEngine;
 
 public class Asteroid : MonoBehaviour
 {
-    [SerializeField] 
+    [SerializeField]
     private float _rotateSpeed = 3f;
-    [SerializeField] 
+    [SerializeField]
     private GameObject _explosionPrefab;
+    [SerializeField]
+    private AudioClip explosionClip;
     private SpawnManager _spawnManager;
+    private bool _isDestroyed = false;
 
     private void Start()
     {
@@ -20,15 +23,29 @@ public class Asteroid : MonoBehaviour
         transform.Rotate(Vector3.forward * _rotateSpeed * Time.deltaTime);
     }
 
+    private void Awake()
+    {
+
+    }
+
     private void OnTriggerEnter2D(Collider2D other)
     {
+        if (_isDestroyed)
+            return;
+
         if (other.CompareTag("Laser"))
         {
-            GetComponent <AudioSource>().Play();
+            _isDestroyed = true;
+
             Instantiate(_explosionPrefab, transform.position, Quaternion.identity);
+
+            AudioSource.PlayClipAtPoint(explosionClip, Camera.main.transform.position, 1f);
+
             Destroy(other.gameObject);
+
             _spawnManager.StartSpawning();
-            Destroy(gameObject, 0.25f);
+
+            Destroy(gameObject);
         }
     }
 }

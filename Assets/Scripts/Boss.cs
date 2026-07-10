@@ -4,15 +4,15 @@ using UnityEngine;
 
 public class Boss : MonoBehaviour
 {
-    [SerializeField] 
+    [SerializeField]
     private float _moveSpeed = 2f;
-    [SerializeField] 
+    [SerializeField]
     private GameObject _laserPrefab;
-    
+
     private Vector3 _targetPosition = new Vector3(0, 2.5f, 0);
     private bool _inPosition;
 
-    [SerializeField] 
+    [SerializeField]
     private Transform _player;
 
     void AimAtPlayerShot()

@@ -136,7 +136,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _speed: 3
-  _powerUpType: 1
+  _powerUpType: 0
   _duration: 6
   _value: 1
 --- !u!95 &1311741588631940698

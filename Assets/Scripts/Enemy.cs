@@ -23,7 +23,7 @@ public class Enemy : MonoBehaviour
     private GameObject _enemyLaserPrefab;
 
     [Header("Effects")]
-    [SerializeField] 
+    [SerializeField]
     private GameObject _explosionPrefab;
 
     [Header("Enemy Type")]
@@ -86,7 +86,7 @@ public class Enemy : MonoBehaviour
             MoveEnemy();
 
         HandleShooting();
-        
+
         HandleAmbusherAttack();
 
         HandleBoundaryReset();
@@ -140,14 +140,18 @@ public class Enemy : MonoBehaviour
 
         if (laser != null)
         {
-            Vector2 direction = (_player.transform.position - transform.position).normalized;
-            laser.Initialize(direction, Laser.LaserOwner.Enemy);
+            laser.Initialize(Vector2.up, Laser.LaserOwner.Player);
         }
     }
 
     public void SetSpeed(float speed)
     {
         _speed = speed;
+    }
+
+    public void SetEnemyType(EnemyType type)
+    {
+        _enemyType = type;
     }
 
     private Transform FindNearestPickup()
@@ -173,13 +177,15 @@ public class Enemy : MonoBehaviour
 
     private void HandleShooting()
     {
-        if (_enemyType != EnemyType.Shooter)
+        if (_enemyType != EnemyType.Shooter && _enemyType != EnemyType.HeatSeeker && _enemyType != EnemyType.ZigZag && _enemyType != EnemyType.Ambusher)
+        {
             return;
+        }
 
         if (Time.time < _canFire)
             return;
 
-        ShootPlayer();
+        FireLaser();
     }
 
     private void ShootAtTarget(Transform target)
@@ -188,7 +194,7 @@ public class Enemy : MonoBehaviour
 
         GameObject laser = Instantiate(_enemyLaserPrefab, transform.position, Quaternion.identity);
 
-        Vector2 direction = (target.position - transform.position).normalized;
+        Vector2 direction = Vector2.down;
 
         Laser l = laser.GetComponent<Laser>();
 
@@ -201,8 +207,7 @@ public class Enemy : MonoBehaviour
     private void ShootPlayer()
     {
         _canFire = Time.time + Random.Range(1f, 4f);
-        _canFire = Time.time + 1;
-        
+
         if (_player == null) return;
 
         Vector3 spawnPos = transform.position;
@@ -213,7 +218,20 @@ public class Enemy : MonoBehaviour
 
         if (laser != null)
         {
-            Vector2 direction = Vector2.down;
+            Vector2 direction;
+
+            if (_player != null && _player.IsMisfireActive())
+            {
+                float angle = Random.Range(-180f, 180f);
+                direction = Quaternion.Euler(0, 0, angle) * Vector2.down;
+
+                Debug.Log("Enemy misfired! Angle: " + angle);
+            }
+            else
+            {
+                direction = Vector2.down;
+            }
+
             laser.Initialize(direction, Laser.LaserOwner.Enemy);
         }
     }
@@ -221,21 +239,78 @@ public class Enemy : MonoBehaviour
     // ---------------- MOVEMENT ----------------
     private void MoveEnemy()
     {
-        switch (_movementPattern)
+        switch (_enemyType)
         {
-            case MovementPattern.Straight:
-                transform.Translate(Vector3.down * _speed * Time.deltaTime);
+            case EnemyType.Basic:
+                MoveStraight();
                 break;
 
-            case MovementPattern.ZigZag:
-                float zig = Mathf.Sin(Time.time * 5f) * 2f;
-                transform.Translate(new Vector3(zig, -1, 0) * _speed * Time.deltaTime);
+            case EnemyType.Shooter:
+                MoveStraight();
                 break;
 
-            case MovementPattern.SineWave:
-                float wave = Mathf.Sin(Time.time * 3f) * 2f;
-                transform.position += new Vector3(wave * Time.deltaTime, -_speed * Time.deltaTime, 0);
+            case EnemyType.ZigZag:
+                MoveZigZag();
                 break;
+
+            case EnemyType.HeatSeeker:
+                HeatSeekPlayer();
+                break;
+
+            case EnemyType.Rammer:
+                MoveStraight();
+                break;
+
+            case EnemyType.Ambusher:
+                AmbushPlayer();
+                break;
+        }
+    }
+    private void MoveStraight()
+    {
+        transform.Translate(Vector3.down * _speed * Time.deltaTime);
+    }
+
+    private void MoveZigZag()
+    {
+        transform.position += new Vector3(Mathf.Sin(Time.time * 5f) * 2f * Time.deltaTime, -_speed * Time.deltaTime, 0f);
+    }
+
+    // ---------------- HEAT SEEKER ----------------
+    private void HeatSeekPlayer()
+    {
+        if (_player == null)
+        {
+            transform.Translate(Vector3.down * _speed * Time.deltaTime);
+            return;
+        }
+
+        Vector2 direction = (_player.transform.position - transform.position).normalized;
+
+        transform.Translate(direction * _speed * Time.deltaTime, Space.World);
+    }
+
+    // ---------------- AMBUSH ----------------
+    private void AmbushPlayer()
+    {
+        if (_player == null)
+        {
+            transform.Translate(Vector3.down * _speed * Time.deltaTime);
+            return;
+        }
+
+        float distance = Vector3.Distance(transform.position, _player.transform.position);
+
+        if (distance < 4f)
+        {
+            Vector2 direction = (_player.transform.position - transform.position).normalized;
+
+            transform.Translate(direction * (_speed * 2f) * Time.deltaTime, Space.World);
+        }
+       
+        else
+        {
+            transform.Translate(Vector3.down * _speed * Time.deltaTime);
         }
     }
 
@@ -262,63 +337,76 @@ public class Enemy : MonoBehaviour
     {
         _canFire = Time.time + Random.Range(2f, 5f);
 
+        // Misfire disables enemy weapons
+        if (_player != null && _player.IsMisfireActive())
+        {
+            Debug.Log("Enemy weapon misfired!");
+            return;
+        }
+
         GameObject laser = Instantiate(_laserPrefab, transform.position, Quaternion.identity);
 
         Laser l = laser.GetComponent<Laser>();
 
         if (l != null)
         {
-            Vector2 direction = Vector2.down;
-            l.Initialize(direction, Laser.LaserOwner.Enemy);
+            l.Initialize(Vector2.down, Laser.LaserOwner.Enemy);
         }
     }
 
     // ---------------- BOUNDARY ----------------
     private void HandleBoundaryReset()
     {
-        if (transform.position.y < -5f)
+        if (transform.position.y < -6f)
         {
-            transform.position = new Vector3(Random.Range(-8f, 8f), 7f, 0);
+            Destroy(gameObject);
         }
     }
 
     // ---------------- COLLISION ----------------
     private void OnTriggerEnter2D(Collider2D other)
-{
-    if (_isDead)
-        return;
-
-    Laser laser = other.GetComponent<Laser>();
-
-    // Ignore enemy lasers completely
-    if (laser != null && laser.Owner == Laser.LaserOwner.Enemy)
     {
-        return;
-    }
+        if (_isDead)
+            return;
 
-    // Only player lasers can damage enemies
-    if (laser != null && laser.Owner == Laser.LaserOwner.Player)
-    {
-        if (_hasShield && _shieldHits > 0)
+        Laser laser = other.GetComponent<Laser>();
+
+        // Ignore enemy lasers completely
+        if (laser != null && laser.Owner == Laser.LaserOwner.Enemy)
         {
-            _shieldHits--;
-
-            if (_shieldHits > 0)
-                return;
+            return;
         }
 
-        Death();
-        return;
-    }
+        // Only player lasers can damage enemies
+        if (laser != null && laser.Owner == Laser.LaserOwner.Player)
+        {
+            Debug.Log("Enemy hit by player projectile");
 
-    if (other.CompareTag("Player"))
-    {
-        other.GetComponent<Player>()?.Damage();
-        Death();
+            if (_hasShield && _shieldHits > 0)
+            {
+                _shieldHits--;
+
+                if (_shieldHits > 0)
+                    return;
+            }
+
+            Death();
+            return;
+        }
+
+        if (other.CompareTag("Player"))
+        {
+            other.GetComponent<Player>()?.TakeDamage();
+            Death();
+        }
     }
-}
 
     public void Damage()
+    {
+        Death();
+    }
+
+    public void BombDamage()
     {
         Death();
     }

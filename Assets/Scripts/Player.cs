@@ -150,6 +150,14 @@ public class Player : MonoBehaviour
             case PowerUpType.Ammo:
                 RefillAmmo();
                 break;
+
+            case PowerUpType.Bomb:
+                ActivateBomb();
+                break;
+
+            case PowerUpType.Misfire:
+                StartCoroutine(MisfireRoutine(duration));
+                break;
         }
     }
 
@@ -256,7 +264,7 @@ public class Player : MonoBehaviour
     {
         if (_isHomingActive)
         {
-            SpawnLaser(Vector2.up, 0f);
+            SpawnHomingMissile();
         }
         else if (_isTripleShotActive)
         {
@@ -274,6 +282,22 @@ public class Player : MonoBehaviour
     void SpawnHomingMissile()
     {
         GameObject missile = Instantiate(_homingProjectilePrefab, transform.position, Quaternion.identity);
+
+        Laser laser = missile.GetComponent<Laser>();
+
+        if (laser != null)
+        {
+            laser.Initialize(Vector2.up, Laser.LaserOwner.Player);
+            laser.SetHoming();
+
+            Debug.Log("Homing missile enabled!");
+        }
+        else
+        {
+            Debug.LogError("Homing Projectile is missing Laser.cs!");
+        }
+
+        Destroy(missile, 5f);
     }
 
     void FireTripleShot()
@@ -449,7 +473,24 @@ public class Player : MonoBehaviour
 
     #endregion
 
+    public bool IsMisfireActive()
+    {
+        return _isMisfireActive;
+    }
+
     #region POWERUPS
+
+    public void ActivateBomb()
+    {
+        Enemy[] enemies = FindObjectsOfType<Enemy>();
+
+        foreach (Enemy enemy in enemies)
+        {
+            enemy.BombDamage();
+        }
+
+        Debug.Log("Bomb Power-Up Activated!");
+    }
 
     private IEnumerator SpeedBoostRoutine(float duration)
     {
@@ -475,15 +516,34 @@ public class Player : MonoBehaviour
         _isTripleShotActive = false;
     }
 
+    private bool _isMisfireActive;
+
+    private IEnumerator MisfireRoutine(float duration)
+    {
+        _isMisfireActive = true;
+
+        Debug.Log("Player weapon Misfire activated!");
+
+        yield return new WaitForSeconds(duration);
+
+        _isMisfireActive = false;
+
+        Debug.Log("Player weapon Misfire ended.");
+    }
+
     private bool _isHomingActive;
 
     private IEnumerator HomingRoutine(float duration)
     {
         _isHomingActive = true;
 
+        Debug.Log("Homing Projectile Activated!");
+
         yield return new WaitForSeconds(duration);
 
         _isHomingActive = false;
+
+        Debug.Log("Homing Projectile Ended");
     }
 
     #endregion

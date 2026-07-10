@@ -27,7 +27,7 @@ public class GameManager : MonoBehaviour
     public void AddScore(int points)
     {
         _score += points;
-        
+
         if (_uiManager != null)
         {
             _uiManager.UpdateScore(_score);

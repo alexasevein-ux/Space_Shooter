@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 
 public class SpawnManager : MonoBehaviour
 {
@@ -12,9 +13,9 @@ public class SpawnManager : MonoBehaviour
     private GameObject[] _powerups;
     [SerializeField]
     private UIManager _uiManager;
-    [SerializeField] 
+    [SerializeField]
     private GameObject _healthPickup;
-    [SerializeField] 
+    [SerializeField]
     private GameObject _ammoPickup;
     [SerializeField]
     private GameObject _shieldPickup;
@@ -24,7 +25,7 @@ public class SpawnManager : MonoBehaviour
     private Player _player;
 
     private float _enemySpeed = 3f;
-    private float _spawnDelay = 1.5f;
+    private float _spawnDelay = 0f;
     private int _currentWave = 1;
     private int _enemiesPerWave = 3;
     private bool _stopSpawning = false;
@@ -47,6 +48,8 @@ public class SpawnManager : MonoBehaviour
 
     public void StartSpawning()
     {
+        Debug.Log("StartSpawning called");
+
         StartCoroutine(SpawnPowerupRoutine());
         StartCoroutine(WaveRoutine());
     }
@@ -63,7 +66,7 @@ public class SpawnManager : MonoBehaviour
         while (_stopSpawning == false)
         {
             Vector3 posToSpawn = new Vector3(Random.Range(-8f, 8f), 7, 0);
-            int randomPowerUp = Random.Range(0, 3);
+            int randomPowerUp = Random.Range(0, _powerups.Length);
             Instantiate(_powerups[randomPowerUp], posToSpawn, Quaternion.identity);
             yield return new WaitForSeconds(Random.Range(3, 8));
         }
@@ -71,39 +74,39 @@ public class SpawnManager : MonoBehaviour
 
     IEnumerator SpawnWave()
     {
+        float startX = -6f;
+        float spacing = 2f;
+
         for (int i = 0; i < _enemiesPerWave; i++)
         {
-            Vector3 posToSpawn =
-                new Vector3(Random.Range(-8f, 8f), 7f, 0);
+            Vector3 posToSpawn = new Vector3(startX + i * spacing, 7f, 0);
 
-            GameObject spawnedEnemy =
-                Instantiate(_enemyPrefab, posToSpawn, Quaternion.identity);
+            GameObject spawnedEnemy = Instantiate(_enemyPrefab, posToSpawn, Quaternion.identity);
+            spawnedEnemy.transform.SetParent(_enemyContainer.transform);
 
             Enemy enemyScript = spawnedEnemy.GetComponent<Enemy>();
 
             if (enemyScript != null)
             {
                 enemyScript.SetSpeed(_enemySpeed);
+                enemyScript.SetEnemyType(Enemy.EnemyType.Shooter);
             }
-
-            spawnedEnemy.transform.parent = _enemyContainer.transform;
 
             yield return new WaitForSeconds(_spawnDelay);
         }
 
-            yield return new WaitUntil(() =>
-            _enemyContainer.transform.childCount == 0);
+        yield return new WaitUntil(() => _enemyContainer.transform.childCount == 0);
     }
 
     IEnumerator WaveRoutine()
     {
         while (!_stopSpawning)
         {
-            if(_uiManager != null)
+            if (_uiManager != null)
             {
                 _uiManager.UpdateWave(_currentWave);
             }
-            
+
             Debug.Log("Starting Wave " + _currentWave);
 
             yield return StartCoroutine(SpawnWave());
@@ -185,13 +188,19 @@ public class SpawnManager : MonoBehaviour
         // Otherwise random
         int random = Random.Range(0, 100);
 
-        if (random < 50)
+        if (random < 20)
             Instantiate(_ammoPickup, spawnPos, Quaternion.identity);
 
-        else if (random < 80)
+        else if (random < 35)
             Instantiate(_shieldPickup, spawnPos, Quaternion.identity);
 
-        else
+        else if (random < 50)
             Instantiate(_healthPickup, spawnPos, Quaternion.identity);
+
+        else
+        {
+            int randomPowerUp = Random.Range(0, _powerups.Length);
+            Instantiate(_powerups[randomPowerUp], spawnPos, Quaternion.identity);
+        }
     }
 }
