@@ -21,18 +21,37 @@ public class SpawnManager : MonoBehaviour
     private GameObject _shieldPickup;
     [SerializeField]
     private GameObject _homingPowerUpPrefab;
+    [SerializeField]
+    private GameObject _bossPrefab;
 
     private Player _player;
 
     private float _enemySpeed = 3f;
     private float _spawnDelay = 0f;
     private int _currentWave = 1;
+    private int _maxWaves = 5;
     private int _enemiesPerWave = 3;
     private bool _stopSpawning = false;
+    private bool _bossSpawned = false;
 
     void Start()
     {
         _player = GameObject.Find("Player").GetComponent<Player>();
+    }
+
+    private void Update()
+    {
+        if (transform.childCount == 0)
+        {
+            if (_currentWave == 5 && !_bossSpawned)
+            {
+                SpawnBoss();
+            }
+            else
+            {
+                StartSpawning();
+            }
+        }
     }
 
     private void TrySpawnDrop(Vector3 position)
@@ -44,6 +63,19 @@ public class SpawnManager : MonoBehaviour
             int randomPickup = Random.Range(0, _powerups.Length);
             Instantiate(_powerups[randomPickup], position, Quaternion.identity);
         }
+    }
+
+    private void SpawnBoss()
+    {
+        Instantiate(_bossPrefab, new Vector3(0, 8, 0), Quaternion.identity);
+
+        _bossSpawned = true;
+
+        Vector3 bossSpawnPos = new Vector3(0f, 8f, 0f);
+
+        Instantiate(_bossPrefab, bossSpawnPos, Quaternion.identity);
+
+        Debug.Log("Boss Spawned!");
     }
 
     public void StartSpawning()
@@ -113,6 +145,14 @@ public class SpawnManager : MonoBehaviour
 
             Debug.Log("Wave " + _currentWave + " Complete!");
 
+
+            if (_currentWave >= _maxWaves)
+            {
+                SpawnBoss();
+
+                yield break;
+            }
+
             _currentWave++;
             _enemiesPerWave++;
 
@@ -171,7 +211,6 @@ public class SpawnManager : MonoBehaviour
 
         Vector3 spawnPos = new Vector3(Random.Range(-8f, 8f), 7f, 0);
 
-        // Low health → higher chance for health
         if (_player.CurrentLives <= 1)
         {
             Instantiate(_healthPickup, spawnPos, Quaternion.identity);

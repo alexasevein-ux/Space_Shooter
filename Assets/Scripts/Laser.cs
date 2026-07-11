@@ -94,15 +94,35 @@ public class Laser : MonoBehaviour
 
         if (Owner == LaserOwner.Player && other.CompareTag("Enemy"))
         {
-            other.GetComponent<Enemy>()?.Damage();
+            Enemy enemy = other.GetComponent<Enemy>();
+
+            if (enemy != null)
+            {
+                enemy.Damage();
+            }
+
+            Boss boss = other.GetComponent<Boss>();
+
+            if (boss != null)
+            {
+                boss.TakeDamage(1);
+            }
+
             Destroy(gameObject);
             return;
         }
 
         if (Owner == LaserOwner.Enemy && other.CompareTag("Player"))
         {
-            other.GetComponent<Player>()?.Damage();
+            Player player = other.GetComponent<Player>();
+
+            if (player != null)
+            {
+                player.DamageShield();
+            }
+
             Destroy(gameObject);
+            return;
         }
 
         if (Owner == LaserOwner.Enemy && other.CompareTag("PowerUp"))

@@ -5,6 +5,10 @@ using TMPro;
 
 public class UIManager : MonoBehaviour
 {
+    [Header("Boss UI")]
+    [SerializeField]
+    private Slider _bossHealthSlider;
+
     [SerializeField] 
     private Text _scoreText;
     [SerializeField] 
@@ -113,6 +117,15 @@ public class UIManager : MonoBehaviour
     public void UpdateAmmo(int current, int maximum)
     {
         _ammoText.text = current + " / " + maximum;
+    }
+
+    public void UpdateBossHealth(int currentHealth, int maxHealth)
+    {
+        if (_bossHealthSlider == null)
+            return;
+
+        _bossHealthSlider.maxValue = maxHealth;
+        _bossHealthSlider.value = currentHealth;
     }
 
     private IEnumerator GameOverFlickerRoutine()

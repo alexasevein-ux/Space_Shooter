@@ -336,7 +336,7 @@ public class Player : MonoBehaviour
 
         if (laser != null && laser.Owner == Laser.LaserOwner.Enemy)
         {
-            Damage();
+            DamageShield();
             Destroy(other.gameObject);
         }
     }
@@ -405,9 +405,9 @@ public class Player : MonoBehaviour
         }
     }
 
-    public void TakeDamage()
+    public void DamageShield()
     {
-        if (_currentShieldHits > 0)
+        if (_isShieldsActive)
         {
             _currentShieldHits--;
 
@@ -418,16 +418,20 @@ public class Player : MonoBehaviour
                 _uiManager.UpdateShield(_currentShieldHits);
             }
 
-            if (_currentShieldHits == 0)
+            if (_currentShieldHits <= 0)
             {
                 _isShieldsActive = false;
-                _shieldVisualizer.SetActive(false);
+
+                if (_shieldVisualizer != null)
+                {
+                    _shieldVisualizer.SetActive(false);
+                }
             }
-
-            return;
         }
-
-        Damage();
+        else
+        {
+            Damage();
+        }
     }
 
     public void ShieldsActive()
@@ -445,30 +449,23 @@ public class Player : MonoBehaviour
             _uiManager.UpdateShield(_currentShieldHits);
     }
 
-    void UpdateShieldVisual()
+    public void UpdateShieldVisual()
     {
-        if (_shieldVisual == null) return;
+        if (_shieldVisual == null)
+            return;
 
-        switch (_currentShieldHits)
+        if (_currentShieldHits == 3)
         {
-            case 3:
-                _shieldVisual.color = Color.cyan;
-                break;
-
-            case 2:
-                _shieldVisual.color = Color.yellow;
-                break;
-
-            case 1:
-                _shieldVisual.color = new Color(1f, 0.5f, 0f);
-                break;
-
-            default:
-                _shieldVisual.color = Color.clear;
-                break;
-
+            _shieldVisual.color = Color.cyan;
         }
-            _uiManager.UpdateShield(_currentShieldHits);
+        else if (_currentShieldHits == 2)
+        {
+            _shieldVisual.color = Color.yellow;
+        }
+        else if (_currentShieldHits == 1)
+        {
+            _shieldVisual.color = Color.red;
+        }
     }
 
     #endregion
