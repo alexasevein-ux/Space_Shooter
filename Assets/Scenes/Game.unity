@@ -3470,8 +3470,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.00001049, y: -154}
-  m_SizeDelta: {x: 160, y: 30}
+  m_AnchoredPosition: {x: 50, y: -80}
+  m_SizeDelta: {x: 600, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1959583129
 GameObject:
@@ -3549,6 +3549,11 @@ PrefabInstance:
     - target: {fileID: -5000022835693618168, guid: 1b1e359a978857b4e8e0faffb6be125e,
         type: 3}
       propertyPath: explosionClip
+      value: 
+      objectReference: {fileID: 8300000, guid: a885c043fab7e46438bba03ba9dab6bc, type: 3}
+    - target: {fileID: -5000022835693618168, guid: 1b1e359a978857b4e8e0faffb6be125e,
+        type: 3}
+      propertyPath: _explosionClip
       value: 
       objectReference: {fileID: 8300000, guid: a885c043fab7e46438bba03ba9dab6bc, type: 3}
     - target: {fileID: -5000022835693618168, guid: 1b1e359a978857b4e8e0faffb6be125e,

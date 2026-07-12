@@ -9,16 +9,16 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private Slider _bossHealthSlider;
 
-    [SerializeField] 
+    [SerializeField]
     private Text _scoreText;
-    [SerializeField] 
+    [SerializeField]
     private Image _livesImg;
-    [SerializeField] 
+    [SerializeField]
     private Sprite[] _livesSprites;
 
-    [SerializeField] 
+    [SerializeField]
     private Text _gameOverText;
-    [SerializeField] 
+    [SerializeField]
     private Text _restartText;
     [SerializeField]
     private GameManager _gameManager;
@@ -27,16 +27,16 @@ public class UIManager : MonoBehaviour
 
     [SerializeField]
     private Slider _shieldSlider;
-    [SerializeField] 
+    [SerializeField]
     private Image _shieldImage;
-    [SerializeField] 
+    [SerializeField]
     private Sprite[] _shieldSprites;
     [SerializeField]
     private TMP_Text _ammoText;
     [SerializeField]
     private TMP_Text _waveText;
 
-    
+
     public void UpdateWave(int wave)
     {
         if (_waveText != null)
@@ -61,7 +61,7 @@ public class UIManager : MonoBehaviour
         if (_ammoText == null)
             Debug.LogError("_ammoText is NULL");
 
-            Debug.Log("Ammo Text = " + _ammoText);
+        Debug.Log("Ammo Text = " + _ammoText);
 
         if (_livesImg == null)
             Debug.LogError("_livesImg is NULL");

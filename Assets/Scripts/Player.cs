@@ -8,56 +8,56 @@ using UnityEngine.SocialPlatforms.Impl;
 public class Player : MonoBehaviour
 {
     [Header("Movement")]
-    [SerializeField] 
+    [SerializeField]
     private float _speed = 3.5f;
-    [SerializeField] 
+    [SerializeField]
     private float _speedMultiplier = 2f;
-    
+
     private bool _isReversed;
 
     [Header("Thruster")]
-    [SerializeField] 
+    [SerializeField]
     private float _maxThrusterCharge = 5f;
-    [SerializeField] 
+    [SerializeField]
     private float _thrusterDrainRate = 1f;
-    [SerializeField] 
+    [SerializeField]
     private float _thrusterRechargeRate = 1f;
     private float _currentThrusterCharge;
 
     [Header("Combat")]
-    [SerializeField] 
+    [SerializeField]
     private GameObject _laserPrefab;
-    [SerializeField] 
+    [SerializeField]
     private GameObject _tripleShotPrefab;
-    [SerializeField] 
+    [SerializeField]
     private float _fireRate = 0.5f;
     private float _canFire = -1f;
 
-    [SerializeField] 
+    [SerializeField]
     private int _lives = 3;
-    [SerializeField] 
+    [SerializeField]
     private int _maxAmmo = 15;
     private int _currentAmmo;
 
-    [SerializeField] 
+    [SerializeField]
     private GameObject _homingProjectilePrefab;
 
     [Header("Shield")]
-    [SerializeField] 
+    [SerializeField]
     private GameObject _shieldVisualizer;
-    [SerializeField] 
+    [SerializeField]
     private SpriteRenderer _shieldVisual;
-    [SerializeField] 
+    [SerializeField]
     private int _shieldHits = 3;
     private int _currentShieldHits;
     private bool _isShieldsActive;
 
     [Header("Effects")]
-    [SerializeField] 
+    [SerializeField]
     private GameObject _explosionPrefab;
-    [SerializeField] 
+    [SerializeField]
     private GameObject _leftEngine;
-    [SerializeField] 
+    [SerializeField]
     private GameObject _rightEngine;
     [SerializeField]
     private CameraShake _cameraShake;
@@ -72,7 +72,7 @@ public class Player : MonoBehaviour
     private bool _isMagnetActive;
     private bool _isHit;
     private float _magnetTimer;
-    [SerializeField] 
+    [SerializeField]
     private float _magnetDuration = 2f;
 
     // Properties

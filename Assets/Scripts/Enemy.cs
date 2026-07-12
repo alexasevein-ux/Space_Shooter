@@ -307,7 +307,7 @@ public class Enemy : MonoBehaviour
 
             transform.Translate(direction * (_speed * 2f) * Time.deltaTime, Space.World);
         }
-       
+
         else
         {
             transform.Translate(Vector3.down * _speed * Time.deltaTime);
